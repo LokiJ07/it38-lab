@@ -1,4 +1,27 @@
-pare($sql)) {
+<?php
+// Include config file
+require_once "../db/config.php";
+
+// Initialize the session
+session_start();
+
+// Check if the user is logged in, if not then redirect them to the login page
+if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
+    header("location:./index.php");
+    exit;
+}
+
+// Function to get user statistics
+function getUserStatistics($pdo) {
+    $stats = [
+        "admin" => 0,
+        "user" => 0,
+        "temp-user" => 0, // Assuming 'temp-user' is stored in the database
+        "total" => 0
+    ];
+
+    $sql = "SELECT user_type, COUNT(*) as count FROM users GROUP BY user_type";
+    if ($stmt = $pdo->prepare($sql)) {
         if ($stmt->execute()) {
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 $stats[$row["user_type"]] = $row["count"];
