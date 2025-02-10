@@ -235,39 +235,47 @@ if ($stmt = $pdo->prepare($sql)) {
     }
 
     function timeElapsed(timestamp) {
-        const currentTime = Date.now() / 1000;
-        const timeDiff = currentTime - new Date(timestamp).getTime() / 1000;
+    // Ensure timestamp is a number (in seconds)
+    const timeStampInSeconds = typeof timestamp === 'number' ? timestamp : new Date(timestamp).getTime() / 1000;
+    
+    const currentTime = Date.now() / 1000; // Current time in seconds
+    const timeDiff = currentTime - timeStampInSeconds; // Difference in seconds
 
-        const intervals = {
-            year: 31536000,
-            month: 2592000,
-            week: 604800,
-            day: 86400,
-            hour: 3600,
-            minute: 60,
-            second: 1
-        };
+    const intervals = {
+        year: 31536000,
+        month: 2592000,
+        week: 604800,
+        day: 86400,
+        hour: 3600,
+        minute: 60,
+        second: 1
+    };
 
-        for (const [unit, seconds] of Object.entries(intervals)) {
-            const elapsed = timeDiff / seconds;
-            if (elapsed >= 1) {
-                const rounded = Math.floor(elapsed);
-                return `${rounded} ${unit}${rounded > 1 ? 's' : ''} ago`;
+    for (const [unit, seconds] of Object.entries(intervals)) {
+        const elapsed = timeDiff / seconds;
+        if (elapsed >= 1) {
+            const rounded = Math.floor(elapsed);
+            return `${rounded} ${unit}${rounded > 1 ? 's' : ''} ago`;
+        }
+    }
+
+    return 'Just now';
+}
+
+// Apply the time elapsed to the table rows
+window.onload = function() {
+    const rows = document.querySelectorAll('#recentLogins tbody tr'); // Corrected selector
+    rows.forEach(row => {
+        const loginTime = row.getAttribute('data-login-time');
+        if (loginTime) {
+            const timeElapsedStr = timeElapsed(loginTime); // Ensure loginTime is in seconds
+            const timeElapsedElement = row.querySelector('.time-elapsed');
+            if (timeElapsedElement) {
+                timeElapsedElement.textContent = timeElapsedStr;
             }
         }
-
-        return 'Just now';
-    }
-
-    // Apply the time elapsed to the table rows
-    window.onload = function() {
-        const rows = document.querySelectorAll('#recentLoginsTable tbody tr');
-        rows.forEach(row => {
-            const loginTime = row.getAttribute('data-login-time');
-            const timeElapsedStr = timeElapsed(loginTime);
-            row.querySelector('.time-elapsed').textContent = timeElapsedStr;
-        });
-    }
+    });
+};
     
     let table1 = new DataTable('#userAccounts');
     let table2 = new DataTable('#recentLogins');
