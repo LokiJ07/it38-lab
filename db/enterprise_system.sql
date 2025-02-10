@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 03, 2025 at 07:51 AM
+-- Generation Time: Feb 10, 2025 at 08:36 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.0.28
 
@@ -28,7 +28,7 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `login_logs` (
-  `id` int(11) NOT NULL,
+  `log_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `login_time` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -37,9 +37,13 @@ CREATE TABLE `login_logs` (
 -- Dumping data for table `login_logs`
 --
 
-INSERT INTO `login_logs` (`id`, `user_id`, `login_time`) VALUES
+INSERT INTO `login_logs` (`log_id`, `user_id`, `login_time`) VALUES
 (1, 3, '2025-02-03 14:48:53'),
-(2, 3, '2025-02-03 14:50:17');
+(2, 3, '2025-02-03 14:50:17'),
+(3, 2, '2025-02-03 15:01:18'),
+(4, 3, '2025-02-10 14:40:29'),
+(5, 2, '2025-02-10 14:40:39'),
+(6, 2, '2025-02-10 15:27:43');
 
 -- --------------------------------------------------------
 
@@ -61,8 +65,8 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `password`, `user_type`, `last_login`, `created_at`) VALUES
-(2, 'admin', '$2y$10$PG/BQ1gBZt/zEzFib/gpze3GRITLic65XbRXX9EHza/hEXWyX/jnm', 'admin', NULL, '2025-02-03 06:46:34'),
-(3, 'user', '$2y$10$lgQsiEhqkCKGCJX.CSHfjOwAVNZSR6Rpps/j/IOvd9mdPRZpyw59G', 'user', '2025-02-03 14:50:17', '2025-02-03 06:48:45');
+(2, 'admin', '$2y$10$PG/BQ1gBZt/zEzFib/gpze3GRITLic65XbRXX9EHza/hEXWyX/jnm', 'admin', '2025-02-10 15:27:43', '2025-02-03 06:46:34'),
+(3, 'user', '$2y$10$lgQsiEhqkCKGCJX.CSHfjOwAVNZSR6Rpps/j/IOvd9mdPRZpyw59G', 'user', '2025-02-10 14:40:29', '2025-02-03 06:48:45');
 
 --
 -- Indexes for dumped tables
@@ -72,7 +76,7 @@ INSERT INTO `users` (`id`, `username`, `password`, `user_type`, `last_login`, `c
 -- Indexes for table `login_logs`
 --
 ALTER TABLE `login_logs`
-  ADD PRIMARY KEY (`id`),
+  ADD PRIMARY KEY (`log_id`),
   ADD KEY `user_id` (`user_id`);
 
 --
@@ -90,7 +94,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `login_logs`
 --
 ALTER TABLE `login_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `users`
