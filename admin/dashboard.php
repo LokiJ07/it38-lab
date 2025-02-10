@@ -50,7 +50,7 @@ if ($stmt = $pdo->prepare($sql)) {
 
 // Fetch recent logins
 $recentLogins = [];
-$sql = "SELECT u.username, u.user_type, l.login_time FROM login_logs l JOIN users u ON l.user_id = u.id ORDER BY l.login_time DESC LIMIT 10";
+$sql = "SELECT l.log_id, u.username, u.user_type, l.login_time FROM login_logs l JOIN users u ON l.user_id = u.id ORDER BY l.login_time DESC";
 if ($stmt = $pdo->prepare($sql)) {
     if ($stmt->execute()) {
         $recentLogins = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -67,6 +67,13 @@ if ($stmt = $pdo->prepare($sql)) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css"></script>
+    <script src="https://cdn.datatables.net/2.2.1/css/dataTables.bootstrap5.css"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/2.2.1/js/dataTables.js"></script>
+    <script src="https://cdn.datatables.net/2.2.1/js/dataTables.bootstrap5.js"></script>
 
     <style>
         .flex-container {
@@ -162,7 +169,7 @@ if ($stmt = $pdo->prepare($sql)) {
 
     <div class="container">
         <h3>User Accounts</h3>
-        <table class="table table-bordered">
+        <table id="userAccounts" class="table table-bordered" style="width:100%">
             <thead>
                 <tr>
                     <th>Username</th>
@@ -172,19 +179,20 @@ if ($stmt = $pdo->prepare($sql)) {
             </thead>
             <tbody>
                 <?php foreach ($userAccounts as $user): ?>
-                <tr>
-                    <td><?php echo htmlspecialchars($user['username']); ?></td>
-                    <td><?php echo htmlspecialchars($user['user_type']); ?></td>
-                    <td><?php echo date("Y-m-d H:i:s", strtotime($user['created_at'])); ?></td>
-                </tr>
+                    <tr>
+                        <td><?php echo htmlspecialchars($user['username']); ?></td>
+                        <td><?php echo htmlspecialchars($user['user_type']); ?></td>
+                        <td><?php echo date("Y-m-d H:i:s", strtotime($user['created_at'])); ?></td>
+                    </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>
 
         <h3>Recent Logins</h3>
-        <table class="table table-bordered" id="recentLoginsTable">
+        <table id="recentLogins" class="table table-bordered" style="width:100%">
             <thead>
                 <tr>
+                    <th>No.</th>
                     <th>Username</th>
                     <th>Role</th>
                     <th>Login Timestamp</th>
@@ -194,16 +202,22 @@ if ($stmt = $pdo->prepare($sql)) {
             <tbody>
                 <?php foreach ($recentLogins as $login): ?>
                 <tr data-login-time="<?php echo htmlspecialchars($login['login_time']); ?>">
+                    <td><?php echo htmlspecialchars($login['log_id']); ?></td>
                     <td><?php echo htmlspecialchars($login['username']); ?></td>
                     <td><?php echo htmlspecialchars($login['user_type']); ?></td>
                     <td><?php echo date("Y-m-d H:i:s", strtotime($login['login_time'])); ?></td>
                     <td class="time-elapsed"></td>
                 </tr>
                 <?php endforeach; ?>
+
             </tbody>
         </table>
         <button class="btn btn-primary" onclick="printToPDF()">Print to PDF</button>
     </div>
+    <div class="container">
+    
+    </div>
+    
     <!--End Dashboard-->             
 
 <script>
@@ -221,39 +235,50 @@ if ($stmt = $pdo->prepare($sql)) {
     }
 
     function timeElapsed(timestamp) {
-        const currentTime = Date.now() / 1000;
-        const timeDiff = currentTime - new Date(timestamp).getTime() / 1000;
+    // Ensure timestamp is a number (in seconds)
+    const timeStampInSeconds = typeof timestamp === 'number' ? timestamp : new Date(timestamp).getTime() / 1000;
+    
+    const currentTime = Date.now() / 1000; // Current time in seconds
+    const timeDiff = currentTime - timeStampInSeconds; // Difference in seconds
 
-        const intervals = {
-            year: 31536000,
-            month: 2592000,
-            week: 604800,
-            day: 86400,
-            hour: 3600,
-            minute: 60,
-            second: 1
-        };
+    const intervals = {
+        year: 31536000,
+        month: 2592000,
+        week: 604800,
+        day: 86400,
+        hour: 3600,
+        minute: 60,
+        second: 1
+    };
 
-        for (const [unit, seconds] of Object.entries(intervals)) {
-            const elapsed = timeDiff / seconds;
-            if (elapsed >= 1) {
-                const rounded = Math.floor(elapsed);
-                return `${rounded} ${unit}${rounded > 1 ? 's' : ''} ago`;
+    for (const [unit, seconds] of Object.entries(intervals)) {
+        const elapsed = timeDiff / seconds;
+        if (elapsed >= 1) {
+            const rounded = Math.floor(elapsed);
+            return `${rounded} ${unit}${rounded > 1 ? 's' : ''} ago`;
+        }
+    }
+
+    return 'Just now';
+}
+
+// Apply the time elapsed to the table rows
+window.onload = function() {
+    const rows = document.querySelectorAll('#recentLogins tbody tr'); // Corrected selector
+    rows.forEach(row => {
+        const loginTime = row.getAttribute('data-login-time');
+        if (loginTime) {
+            const timeElapsedStr = timeElapsed(loginTime); // Ensure loginTime is in seconds
+            const timeElapsedElement = row.querySelector('.time-elapsed');
+            if (timeElapsedElement) {
+                timeElapsedElement.textContent = timeElapsedStr;
             }
         }
-
-        return 'Just now';
-    }
-
-    // Apply the time elapsed to the table rows
-    window.onload = function() {
-        const rows = document.querySelectorAll('#recentLoginsTable tbody tr');
-        rows.forEach(row => {
-            const loginTime = row.getAttribute('data-login-time');
-            const timeElapsedStr = timeElapsed(loginTime);
-            row.querySelector('.time-elapsed').textContent = timeElapsedStr;
-        });
-    }
-</script>
+    });
+};
+    
+    let table1 = new DataTable('#userAccounts');
+    let table2 = new DataTable('#recentLogins');
+</script
 </body>
 </html>
