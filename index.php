@@ -5,9 +5,12 @@ session_start();
 // Check if the user is already logged in, if yes then redirect them to the appropriate page
 if (isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true) {
     if ($_SESSION["user_type"] === "admin") {
-        header("location: /admin/dashboard.php");
+        header("location: ./admin/dashboard.php");
+            // Log attendance check-in
+  
     } else {
-        header("location: /user/home.php");
+    
+        header("location: ./user/home.php");
     }
     exit;
 }
@@ -81,6 +84,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 $log_stmt->bindParam(":user_id", $id, PDO::PARAM_INT);
                                 $log_stmt->execute();
                             }
+
+                             // Log attendance check-in
+                             $attendance_sql = "INSERT INTO tbl_attendance (user_id, attendance_date) VALUES (:user_id, NOW())";
+                             if ($attendance_stmt = $pdo->prepare($attendance_sql)) {
+                                 $attendance_stmt->bindParam(":user_id", $id, PDO::PARAM_INT);
+                                 $attendance_stmt->execute();
+                             }
 
                             // Redirect user based on user type
                             if ($db_user_type === "admin") {

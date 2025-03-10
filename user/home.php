@@ -21,6 +21,12 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
 </head>
 <body>
     <h1 class="my-5">Hi, <b><?php echo htmlspecialchars($_SESSION["username"]); ?></b>. Welcome to our site.</h1>
+    <!-- Check Out Button -->
+<div class="container mt-3">
+    <form action="../admin/checkout.php" method="post">
+        <button type="submit" class="btn btn-danger">Check Out</button>
+    </form>
+</div>
     <p>
         <!--
             <a href="reset-password.php" class="btn btn-warning">Reset Your Password</a>

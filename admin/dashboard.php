@@ -99,6 +99,7 @@ if ($stmt = $pdo->prepare($sql)) {
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
+            
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <!--
@@ -280,5 +281,7 @@ window.onload = function() {
     let table1 = new DataTable('#userAccounts');
     let table2 = new DataTable('#recentLogins');
 </script
+
+
 </body>
 </html>
